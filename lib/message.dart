@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class Message extends StatefulWidget{
   final List<dynamic> messages;
   final List<bool> isself;
-  const Message({Key key, this.messages, this.isself}) : super(key: key);
+  final List<dynamic> name;
+  const Message({Key key, this.messages, this.isself, this.name}) : super(key: key);
   @override
   _MessageState createState() => _MessageState();
 }
@@ -26,11 +27,23 @@ class _MessageState extends State<Message> {
           child: Align(
             alignment: widget.isself[index]?Alignment.centerRight:Alignment.centerLeft,
                       child: Container(
- margin: EdgeInsets.all(5),
-            width: size.width/2,
-            height: size.height/20,
-            color:widget.isself[index]?Colors.blue:Colors.greenAccent,
-            child: Text("${widget.messages[index]}",textAlign: widget.isself[index]?TextAlign.right:TextAlign.left,),
+                        decoration: BoxDecoration(
+                              color:widget.isself[index]?Colors.blue:Colors.greenAccent,
+                          borderRadius: BorderRadius.circular(size.height/70)),
+                      margin: EdgeInsets.all(5),
+                      width: size.width/1.8,
+                      height: size.height/12,
+        
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(left: size.width/60),
+                  child: Text("${widget.name[index]}",textAlign: widget.isself[index]?TextAlign.left:TextAlign.right,style: TextStyle(fontSize: size.height/80,color: Colors.white))),
+                Text("${widget.messages[index]}",textAlign: widget.isself[index]?TextAlign.left:TextAlign.right,style: TextStyle(fontSize: size.height/50)),
+              ],
+            ),
             ),
           ),
         );

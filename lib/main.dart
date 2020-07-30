@@ -1,116 +1,93 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:adhara_socket_io/adhara_socket_io.dart';
-import 'message.dart';
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
+import 'package:shared_preferences/shared_preferences.dart';
+import 'inital.dart';
+void main() => runApp(Initial());
+class Initial extends StatelessWidget{
   @override
-@override
-Widget build(BuildContext context) {
-  return MaterialApp(
-    
-    home: MyAppWidget(),
-  );
-}
-}
-class MyAppWidget extends StatefulWidget{
-  @override
- 
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyAppWidget> {
-  SocketIOManager manager;
-   SocketOptions socketOptions;
-  SocketIO socket;
-TextEditingController textEditingController=new TextEditingController();
-String text;
-  @override
-  void initState() {
-    super.initState();
-     socketOptions=new SocketOptions("http://192.168.137.1:3000",enableLogging: true,transports: [Transports.WEB_SOCKET,Transports.POLLING]);
-    socketConfig();
+  Widget build(BuildContext context) {
+    return MaterialApp(home: InitialPage(),);
   }
 
-void sendmessage(msg){
-  socket.emit("msg", [msg]);
 }
-void onrecieve(){
-	socket.on("chat-message", (data){   //sample event
-		  print("news");
-		 print(data);
-     setState(() {
-       messages.add(data);
-       isself.add(false);
-     });
-		});
+
+class InitialPage extends StatefulWidget{
+  @override
+  _InitialState createState() => _InitialState();
 }
-Future<void> socketConfig() async {
-    manager = SocketIOManager();
- socket = await manager.createInstance(socketOptions);    
-		socket.connect();
-	onrecieve();
-	}
-  List<dynamic> messages=new List<dynamic>();
-  List<bool> isself=new List<bool>();
+
+class _InitialState extends State<InitialPage> {
+TextEditingController textEditingController=new TextEditingController();
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    textEditingController.addListener(texteditinglistener);
+  }
+  void texteditinglistener(){
+      if(textEditingController.text.length>5){
+        setState(() {
+            buttonColor=Colors.black;
+        });
+      
+      }
+  }
+void savename(name)async{
+SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
+sharedPreferences.setString("Name", name);
+}
+Color buttonColor=Colors.white;
   @override
   Widget build(BuildContext context) {
     var size=MediaQuery.of(context).size;
-    return
- Scaffold(
-      body: SingleChildScrollView(
-              child: Container(
-          
+    return Scaffold(
+      body: Container(
+        color: Colors.lightBlueAccent,
+        child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Message(messages: messages,isself:isself ,),
+             
               Container(
-               
                 width: size.width,
-                height: size.height*0.1,
-                child: Row(
-                  children: [
-
-                    Container(
-                      width: size.width*0.8,
-                 
-                        child: TextFormField(
-                          controller: textEditingController,
-                          style: TextStyle(fontSize: size.height/35),
-                          decoration: InputDecoration(
-                            border: InputBorder.none
-                          ),
-                        ),
-                      
-                    ),
-                    Container(
-                      
-                       width: size.width*0.2,
-                       height: size.height*0.2,
-                      child: RaisedButton(
-                        color: Colors.black,
-                        highlightColor: Colors.blueAccent,
-                        highlightElevation: 30,
-                        child: Icon(Icons.send,color: Colors.orangeAccent,size: size.height/30,),
-                        onPressed: 
-                      (){
-                        setState(() {
-                          sendmessage(textEditingController.text.toString());
-                          messages.add(textEditingController.text.toString());
-                          isself.add(true);
-                        });
-                      }),
-                    )
-                  ],
+                height: size.height/10,
+                color: Colors.teal,
+                child: TextFormField(
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: size.height/20,decoration: TextDecoration.none),
+                  controller:textEditingController ,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Your NickName Please :)",
+                    hintStyle:TextStyle(fontSize: size.height/25,)
+                  ),
+                  
                 ),
+              ),
+              InkWell(
+                onTap: (){
+                  if(textEditingController.text.length>5){
+                    savename(textEditingController.text.toString());
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>MyApp()));
+                  }
+                },
+                              child: AnimatedContainer(
+                                duration: Duration(milliseconds: 800),
+                                curve: Curves.easeIn,
+                                                              child: Container(
+                                  margin: EdgeInsets.all(10),
+                                    color: Colors.white,
+                                    width: size.width/3,
+                                     height: size.height/15,
+                                  child: Center(
+                                    child: Text("Enter",style: TextStyle(fontSize: size.height/30,color: buttonColor),),
+                                  ),
+                ),
+                              ),
               )
             ],
-          )
+          ),
         ),
-      ),
-    
+      ) ,
     );
   }
 }
