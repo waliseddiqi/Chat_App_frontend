@@ -41,7 +41,8 @@ void onrecieve(){
 		  print("news");
 		 print(data);
      setState(() {
-       text=data;
+       messages.add(data);
+       isself.add(false);
      });
 		});
 }
@@ -51,7 +52,8 @@ Future<void> socketConfig() async {
 		socket.connect();
 	onrecieve();
 	}
-  List<dynamic> texts=new List<dynamic>();
+  List<dynamic> messages=new List<dynamic>();
+  List<bool> isself=new List<bool>();
   @override
   Widget build(BuildContext context) {
     var size=MediaQuery.of(context).size;
@@ -63,7 +65,7 @@ Future<void> socketConfig() async {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Message(messages: texts,),
+              Message(messages: messages,isself:isself ,),
               Container(
                
                 width: size.width,
@@ -95,7 +97,9 @@ Future<void> socketConfig() async {
                         onPressed: 
                       (){
                         setState(() {
-                          texts.add(textEditingController.text.toString());
+                          sendmessage(textEditingController.text.toString());
+                          messages.add(textEditingController.text.toString());
+                          isself.add(true);
                         });
                       }),
                     )
