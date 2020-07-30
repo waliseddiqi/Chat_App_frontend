@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:adhara_socket_io/adhara_socket_io.dart';
-
+import 'message.dart';
 void main() => runApp(MyApp());
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   @override
+@override
+Widget build(BuildContext context) {
+  return MaterialApp(
+    
+    home: MyAppWidget(),
+  );
+}
+}
+class MyAppWidget extends StatefulWidget{
+  @override
+ 
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyAppWidget> {
   SocketIOManager manager;
    SocketOptions socketOptions;
   SocketIO socket;
@@ -40,26 +51,62 @@ Future<void> socketConfig() async {
 		socket.connect();
 	onrecieve();
 	}
+  List<dynamic> texts=new List<dynamic>();
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-home: Scaffold(
-      body: Container(
-        child: Column(
-          children: [
-            Text("Socket io here"),
-            TextField(controller:textEditingController),
-            RaisedButton(
-              onPressed: () {
-                sendmessage(textEditingController.text.toString());
-              },
-              child: Container()
-            ),
-            Text("$text")
-          ],
+    var size=MediaQuery.of(context).size;
+    return
+ Scaffold(
+      body: SingleChildScrollView(
+              child: Container(
+          
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Message(messages: texts,),
+              Container(
+               
+                width: size.width,
+                height: size.height*0.1,
+                child: Row(
+                  children: [
+
+                    Container(
+                      width: size.width*0.8,
+                 
+                        child: TextFormField(
+                          controller: textEditingController,
+                          style: TextStyle(fontSize: size.height/35),
+                          decoration: InputDecoration(
+                            border: InputBorder.none
+                          ),
+                        ),
+                      
+                    ),
+                    Container(
+                      
+                       width: size.width*0.2,
+                       height: size.height*0.2,
+                      child: RaisedButton(
+                        color: Colors.black,
+                        highlightColor: Colors.blueAccent,
+                        highlightElevation: 30,
+                        child: Icon(Icons.send,color: Colors.orangeAccent,size: size.height/30,),
+                        onPressed: 
+                      (){
+                        setState(() {
+                          texts.add(textEditingController.text.toString());
+                        });
+                      }),
+                    )
+                  ],
+                ),
+              )
+            ],
+          )
         ),
       ),
-    ),
+    
     );
   }
 }
