@@ -30,7 +30,7 @@ String _name="";
   @override
   void initState() {
     super.initState();
-
+      
      socketOptions=new SocketOptions("http://192.168.137.1:3000",enableLogging: true,transports: [Transports.WEB_SOCKET,Transports.POLLING]);
     socketConfig();
   }
@@ -38,13 +38,16 @@ loadname() async{
 SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
 _name=sharedPreferences.getString("Name");
 }
+
+void newusercreatea(){
+  socket.emit("new-user", [_name]);
+}
 void sendmessage(msg){
   socket.emit("msg", [{"name":_name,"msg":msg}]);
 }
 void onrecieve(){
 	socket.on("chat-message", (data){   //sample event
-		  print("news");
-     
+		
     
      // print(data);
      setState(() {
@@ -53,12 +56,16 @@ void onrecieve(){
      isself.add(false);
      });
 		});
+    socket.on("new-user",(data){
+      print(data+"Has joined the chat");
+    });
 }
 Future<void> socketConfig() async {
     loadname();
     manager = SocketIOManager();
  socket = await manager.createInstance(socketOptions);    
 		socket.connect();
+    newusercreatea();
 	onrecieve();
 	}
   List<dynamic> messages=new List<dynamic>();
