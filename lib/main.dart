@@ -31,9 +31,10 @@ TextEditingController textEditingController=new TextEditingController();
       
       }
   }
-void savename(name)async{
+Future<void> savename(name)async{
 SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
 sharedPreferences.setString("Name", name);
+
 }
 Color buttonColor=Colors.white;
   @override
@@ -66,8 +67,10 @@ Color buttonColor=Colors.white;
               InkWell(
                 onTap: (){
                   if(textEditingController.text.length>5){
-                    savename(textEditingController.text.toString());
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>MyApp()));
+                    savename(textEditingController.text.toString()).then((value) => {
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>MyApp()))
+                    });
+                  
                   }
                 },
                               child: AnimatedContainer(
