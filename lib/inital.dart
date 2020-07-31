@@ -27,6 +27,7 @@ class _MyAppState extends State<MyAppWidget> {
 TextEditingController textEditingController=new TextEditingController();
 String text;
 String _name="";
+final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   @override
   void initState() {
     super.initState();
@@ -57,8 +58,12 @@ void onrecieve(){
      });
 		});
     socket.on("new-user",(data){
-      print(data+"Has joined the chat");
+      print(data);
+      _showSnackBar(data);
     });
+}
+_showSnackBar(data){
+  _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("$data has Joined Chat"),duration: Duration(milliseconds: 600)));
 }
 Future<void> socketConfig() async {
     loadname();
@@ -76,6 +81,7 @@ Future<void> socketConfig() async {
     var size=MediaQuery.of(context).size;
     return
  Scaffold(
+   key: _scaffoldKey,
       body: SingleChildScrollView(
               child: Container(
           
@@ -114,6 +120,7 @@ Future<void> socketConfig() async {
                         onPressed: 
                       (){
                         setState(() {
+                        
                           sendmessage(textEditingController.text.toString());
                           messages.add(textEditingController.text.toString());
                           name.add("You");
