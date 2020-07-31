@@ -32,7 +32,7 @@ final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   void initState() {
     super.initState();
       
-     socketOptions=new SocketOptions("http://192.168.137.1:3000",enableLogging: true,transports: [Transports.WEB_SOCKET,Transports.POLLING]);
+     socketOptions=new SocketOptions("https://chatapp45.herokuapp.com/",enableLogging: true,transports: [Transports.WEB_SOCKET,Transports.POLLING]);
     socketConfig();
   }
 loadname() async{
