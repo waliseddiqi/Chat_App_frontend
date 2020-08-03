@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:adhara_socket_io/adhara_socket_io.dart';
 import 'message.dart';
 import 'main.dart';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
 class MyApp extends StatelessWidget {
   @override
 @override
@@ -21,20 +25,50 @@ class MyAppWidget extends StatefulWidget{
 }
 
 class _MyAppState extends State<MyAppWidget> {
+
+ File _image;
+  final picker = ImagePicker();
+  List<bool> isImage=new List<bool>();
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+  
+    setState(() {
+        isself.add(true);
+       
+        name.add("you");
+        isImage.add(true);
+      _image = File(pickedFile.path);
+     String dedata;
+    messages.add(_image);
+_image.readAsBytes().then((value) => {
+  dedata=base64Encode(value),
+   
+  sendimage(dedata)
+});
+    });
+  }
+
+
   SocketIOManager manager;
    SocketOptions socketOptions;
   SocketIO socket;
 TextEditingController textEditingController=new TextEditingController();
 String text;
 String _name="";
-final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+ GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+String notificationTask="no simple anymore";
   @override
   void initState() {
     super.initState();
+
+
       //https://chatapp45.herokuapp.com/
      socketOptions=new SocketOptions("https://chatapp45.herokuapp.com",enableLogging: true,transports: [Transports.WEB_SOCKET,Transports.POLLING]);
     socketConfig();
   }
+
+
+
 Future<void>loadname() async{
 SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
 _name=sharedPreferences.getString("Name");
@@ -43,18 +77,22 @@ _name=sharedPreferences.getString("Name");
 void newusercreatea(){
   socket.emit("new-user", [{"name":_name}]);
 }
+void sendimage(file){
+  socket.emit("ImageFile", [{"name":_name,"Image":file}]);
+}
 void sendmessage(msg){
   socket.emit("msg", [{"name":_name,"msg":msg}]);
 }
 void onrecieve(){
-	socket.on("chat-message", (data){   //sample event
-		
-    
+	socket.on("chat-message", (data){  
+
+  
      // print(data);
      setState(() {
        messages.add(data[1]);
        name.add(data[0]);
      isself.add(false);
+     isImage.add(false);
      });
 		});
     socket.on("user-connected",(data){
@@ -64,10 +102,30 @@ void onrecieve(){
     socket.on("user-disconnected", (data) { 
       _showSnackBar(data+"has Disconnected",Colors.redAccent);
     });
+
+    socket.on("get-Image", (data) { 
+      try {
+       
+     //var dataimage= base64.decode(data[1]);
+     // print(dataimage);
+     setState(() {
+       messages.add(data[1]);
+      name.add(data[0]);
+      isImage.add(true);
+      isself.add(false);
+     });
+      
+      } catch (e) {
+        //print(e);
+      }
+   
+     
+    });
 }
 _showSnackBar(data,color){
   _scaffoldKey.currentState.showSnackBar(SnackBar(backgroundColor: color,content: Text("$data"),duration: Duration(seconds: 1)));
 }
+
 
 void logout() async{
   String name=_name+"User Disconnected";
@@ -91,18 +149,20 @@ Future<void> socketConfig() async {
 	}
   List<dynamic> messages=new List<dynamic>();
   List<bool> isself=new List<bool>();
+ 
   List<dynamic> name=new List<dynamic>();
   @override
   Widget build(BuildContext context) {
     var size=MediaQuery.of(context).size;
     return
  Scaffold(
+   backgroundColor:  Color(0xFFf0fcdb),
    appBar: AppBar(
      title: Text("Chat"),
    ),
    drawer: Drawer(
      child: Container(
-       width: size.width/2.5,
+      
        color: Colors.white,
        child: Column(
          children: [
@@ -122,7 +182,7 @@ Future<void> socketConfig() async {
            InkWell(
                         child: Container(
                               margin: EdgeInsets.only(top: size.height/100),
-               height: size.height*0.07,
+               height: size.height*0.08,
                width: size.width/2.5,
                 color: Colors.blueAccent,
                child: Center(child: Text("Create Room",style: TextStyle(color: Colors.white),)),),
@@ -154,59 +214,101 @@ Future<void> socketConfig() async {
    key: _scaffoldKey,
       body: 
         
-         SingleChildScrollView(
+         Center(
                     child: Container(
-                      
-              
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Message(messages: messages,isself:isself ,name: name,),
-                  Container(
-                   
-                    width: size.width,
-                  color: Colors.red,
-                    height: size.height*0.1,
-                    child: Row(
-                      children: [
-
-                        Container(
-                          width: size.width*0.8,
                      
-                            child: TextFormField(
-                              controller: textEditingController,
-                              style: TextStyle(fontSize: size.height/35),
-                              decoration: InputDecoration(
-                                border: InputBorder.none
+              
+              child: SingleChildScrollView(
+         
+                              child: Column(
+           mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Messages(messages: messages,isself:isself,name: name,isImage: isImage,),
+                    
+                   
+                                         Container(
+                                           
+                        width: size.width,
+                      decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(size.height/25),
+                              color: Colors.white
                               ),
+                        height: size.height*0.08,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+
+                            Container(
+                             
+                              width: size.width*0.70,
+                              
+                                margin: EdgeInsets.only(left: size.width/50),
+                                child: TextFormField(
+                                
+                                  controller: textEditingController,
+                                  style: TextStyle(fontSize: size.height/35),
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Say Something"
+                                  ),
+                                ),
+                              
                             ),
-                          
+                            Container(
+                                width: size.width*0.25,
+                         
+                               height: size.height*0.1,
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                  
+                                 
+                                     width: size.width*0.125,
+                               height: size.height*0.1,
+                                    child: InkWell(
+                                 
+                                     
+                               
+                                      child: Icon(Icons.send,color: Colors.orangeAccent,size: size.height/35,),
+                                      onTap: 
+                                    (){
+                                      setState(() {
+                                         isImage.add(false);
+                                        sendmessage(textEditingController.text.toString());
+                                        messages.add(textEditingController.text.toString());
+                                        name.add("You");
+                                        isself.add(true);
+                                        textEditingController.clear();
+                                     
+                                      });
+                                    }),
+                                  ),
+                                     Container(
+                                     
+                                
+                                     width: size.width*0.125,
+                               height: size.height*0.1,
+                                    child: InkWell(
+                                 
+                                     
+                               
+                                      child: Icon(Icons.photo_library,color: Colors.orangeAccent,size: size.height/35,),
+                                      onTap: 
+                                    (){
+                                     getImage();
+                                    }),
+                                  ),
+                                  
+                                ],
+                              ),
+                            )
+                          ],
                         ),
-                        Container(
-                          
-                           width: size.width*0.2,
-                           height: size.height*0.1,
-                          child: RaisedButton(
-                            color: Colors.black,
-                            highlightColor: Colors.blueAccent,
-                            highlightElevation: 30,
-                            child: Icon(Icons.send,color: Colors.orangeAccent,size: size.height/30,),
-                            onPressed: 
-                          (){
-                            setState(() {
-                            
-                              sendmessage(textEditingController.text.toString());
-                              messages.add(textEditingController.text.toString());
-                              name.add("You");
-                              isself.add(true);
-                              textEditingController.clear();
-                            });
-                          }),
-                        )
-                      ],
-                    ),
-                  )
-                ],
+                      ),
+                  
+                  ],
+                ),
               )
             ),
          ),
