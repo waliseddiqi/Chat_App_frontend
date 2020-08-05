@@ -57,14 +57,31 @@ void initState() {
              
                 child:widget.isImage[index]?
                 Container(
-                
-                decoration: BoxDecoration(
-                  image: DecorationImage(image:
-                  widget.isself[index]?FileImage(widget.messages[index]):
-                  MemoryImage(
-                    base64.decode("${widget.messages[index]}")
-                    ),fit: BoxFit.contain)
-                ),
+                    margin: EdgeInsets.all(size.height/110),
+                  width: size.width/3.5,
+                      height: size.height/3.5,
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                           child: Text("${widget.name[index]}",textAlign: TextAlign.left,style: TextStyle(fontSize: size.height/70,color: widget.isself[index]?Colors.white:Colors.grey))),
+                          
+                        ],
+                      ),
+                      Container(
+                      width: size.width/4,
+                      height: size.height/4,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(image:
+                        widget.isself[index]?FileImage(widget.messages[index]):
+                        MemoryImage(
+                          base64.decode("${widget.messages[index]}")
+                          ),fit: BoxFit.cover)
+                      ),
+                      ),
+                    ],
+                  ),
                 ):
                
                 Container(
