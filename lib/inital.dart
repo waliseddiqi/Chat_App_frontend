@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -8,13 +7,20 @@ import 'main.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
+import 'env.dart';
+import 'package:provider/provider.dart';
+import 'Clients.dart';
+import 'PrivateChat.dart';
 class MyApp extends StatelessWidget {
   @override
 @override
 Widget build(BuildContext context) {
-  return MaterialApp(
-    
-    home: MyAppWidget(),
+  return ChangeNotifierProvider(
+    create: (context) => Clients(),
+      child: MaterialApp(
+      
+      home: MyAppWidget(),
+    ),
   );
 }
 }
@@ -25,7 +31,7 @@ class MyAppWidget extends StatefulWidget{
 }
 
 class _MyAppState extends State<MyAppWidget> {
-
+Env env=new Env();
  File _image;
   final picker = ImagePicker();
   List<bool> isImage=new List<bool>();
@@ -63,7 +69,7 @@ String notificationTask="no simple anymore";
 
 
       //https://chatapp45.herokuapp.com/
-     socketOptions=new SocketOptions("https://chatapp45.herokuapp.com",enableLogging: true,transports: [Transports.WEB_SOCKET,Transports.POLLING]);
+     socketOptions=new SocketOptions(env.productionUrl,enableLogging: true,transports: [Transports.WEB_SOCKET,Transports.POLLING]);
     socketConfig();
   }
 
@@ -98,9 +104,14 @@ void onrecieve(){
     socket.on("user-connected",(data){
  
       _showSnackBar(data+" has joined",Colors.green);
+      var clients=Provider.of<Clients>(context,listen: false);
+      clients.clients=data;
     });
     socket.on("user-disconnected", (data) { 
       _showSnackBar(data+"has Disconnected",Colors.redAccent);
+      print(data);
+      var clients=Provider.of<Clients>(context,listen: false);
+      clients.remove(data);
     });
 
     socket.on("get-Image", (data) { 
@@ -128,7 +139,7 @@ _showSnackBar(data,color){
 
 
 void logout() async{
-  String name=_name+"User Disconnected";
+  String name=_name;
   socket.emit("disconnected", [{"name":name}]);
   SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
   sharedPreferences.clear().then((value) => {
@@ -180,6 +191,9 @@ Future<void> socketConfig() async {
            ),
 
            InkWell(
+             onTap: (){
+               Navigator.of(context).push(MaterialPageRoute(builder: (context)=>PrivateChat()));
+             },
                         child: Container(
                               margin: EdgeInsets.only(top: size.height/100),
                height: size.height*0.08,
