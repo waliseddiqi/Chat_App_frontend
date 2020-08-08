@@ -1,4 +1,5 @@
 
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:adhara_socket_io/adhara_socket_io.dart';
@@ -11,6 +12,7 @@ import 'env.dart';
 import 'package:provider/provider.dart';
 import 'Clients.dart';
 import 'PrivateChat.dart';
+
 class MyApp extends StatelessWidget {
   @override
 @override
@@ -34,24 +36,27 @@ class _MyAppState extends State<MyAppWidget> {
 Env env=new Env();
  File _image;
   final picker = ImagePicker();
-  List<bool> isImage=new List<bool>();
+ 
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
   
-    setState(() {
+    /*setState(() {
         isself.add(true);
        
         name.add("you");
         isImage.add(true);
-      _image = File(pickedFile.path);
+     */
+     _image = File(pickedFile.path);
      String dedata;
-    messages.add(_image);
+     var clientMessages=Provider.of<Clients>(context,listen: false);
+     clientMessages.setmessage(_image, "You", true, true);
+    //messages.add(_image);
 _image.readAsBytes().then((value) => {
   dedata=base64Encode(value),
    
   sendimage(dedata)
 });
-    });
+  
   }
 
 
@@ -92,14 +97,16 @@ void sendmessage(msg){
 void onrecieve(){
 	socket.on("chat-message", (data){  
 
-  
+  var clientMessages=Provider.of<Clients>(context,listen: false);
+  clientMessages.setmessage(data[1], data[0], false, false);
      // print(data);
-     setState(() {
+   /*  setState(() {
        messages.add(data[1]);
        name.add(data[0]);
      isself.add(false);
      isImage.add(false);
-     });
+     });*/
+     
 		});
     socket.on("user-connected",(data){
  
@@ -119,12 +126,14 @@ void onrecieve(){
        
      //var dataimage= base64.decode(data[1]);
      // print(dataimage);
-     setState(() {
+     /*setState(() {
        messages.add(data[1]);
       name.add(data[0]);
       isImage.add(true);
       isself.add(false);
-     });
+     });*/
+     var clientMessages=Provider.of<Clients>(context,listen: false);
+     clientMessages.setmessage(data[1],data[0], false, true);
       
       } catch (e) {
         //print(e);
@@ -158,10 +167,6 @@ Future<void> socketConfig() async {
 	onrecieve();
   newusercreatea();
 	}
-  List<dynamic> messages=new List<dynamic>();
-  List<bool> isself=new List<bool>();
- 
-  List<dynamic> name=new List<dynamic>();
   @override
   Widget build(BuildContext context) {
     var size=MediaQuery.of(context).size;
@@ -237,7 +242,7 @@ Future<void> socketConfig() async {
                               child: Column(
            mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Messages(messages: messages,isself:isself,name: name,isImage: isImage,),
+                    Messages(),
                     
                    
                                          Container(
@@ -287,15 +292,20 @@ Future<void> socketConfig() async {
                                       child: Icon(Icons.send,color: Colors.orangeAccent,size: size.height/35,),
                                       onTap: 
                                     (){
-                                      setState(() {
+                                      /*setState(() {
                                          isImage.add(false);
                                         sendmessage(textEditingController.text.toString());
                                         messages.add(textEditingController.text.toString());
                                         name.add("You");
                                         isself.add(true);
-                                        textEditingController.clear();
+                                       
                                      
-                                      });
+                                      });*/
+                                      sendmessage(textEditingController.text.toString());
+                                        var clientMessages=Provider.of<Clients>(context,listen: false);
+                                       
+                                        clientMessages.setmessage(textEditingController.text.toString(), "You", true, false);
+                                         textEditingController.clear();
                                     }),
                                   ),
                                      Container(
@@ -327,8 +337,8 @@ Future<void> socketConfig() async {
             ),
          ),
         
-      
+   );
+
     
-    );
   }
 }
