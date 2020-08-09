@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'Clients.dart';
+import 'ImageView.dart';
 class Messages extends StatefulWidget{
 
   const Messages({Key key}) : super(key: key);
@@ -69,16 +70,24 @@ void initState() {
                             
                           ],
                         ),
-                        Container(
-                        width: size.width/4,
-                        height: size.height/4,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(image:
-                        data.clientMessages[index].isSelf?FileImage(data.clientMessages[index].message):
-                          MemoryImage(
-                            base64.decode("${data.clientMessages[index].message}")
-                            ),fit: BoxFit.cover)
-                        ),
+                        InkWell(
+                          onTap: (){
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ImageView(image:data.clientMessages[index].message,isFile:data.clientMessages[index].isSelf,tag: "$index",)));
+                          },
+                                                  child: Hero(
+                            tag: "$index",
+                                                    child: Container(
+                            width: size.width/4,
+                            height: size.height/4,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(image:
+                            data.clientMessages[index].isSelf?FileImage(data.clientMessages[index].message):
+                              MemoryImage(
+                                base64.decode("${data.clientMessages[index].message}")
+                                ),fit: BoxFit.cover)
+                            ),
+                            ),
+                          ),
                         ),
                       ],
                     ),

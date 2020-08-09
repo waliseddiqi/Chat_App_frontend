@@ -33,7 +33,7 @@ class MyAppWidget extends StatefulWidget{
 }
 
 class _MyAppState extends State<MyAppWidget> {
-Env env=new Env();
+
  File _image;
   final picker = ImagePicker();
  
@@ -45,7 +45,8 @@ Env env=new Env();
        
         name.add("you");
         isImage.add(true);
-     */
+
+*/
      _image = File(pickedFile.path);
      String dedata;
      var clientMessages=Provider.of<Clients>(context,listen: false);
@@ -74,7 +75,7 @@ String notificationTask="no simple anymore";
 
 
       //https://chatapp45.herokuapp.com/
-     socketOptions=new SocketOptions(env.productionUrl,enableLogging: true,transports: [Transports.WEB_SOCKET,Transports.POLLING]);
+     socketOptions=new SocketOptions(Env.productionUrl,enableLogging: true,transports: [Transports.WEB_SOCKET,Transports.POLLING]);
     socketConfig();
   }
 
