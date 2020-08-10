@@ -1,8 +1,10 @@
 
 
 
+import 'package:ChatApp/PrivateChatMessages.dart';
 import 'package:flutter/material.dart';
 import 'ClientMessages.dart';
+import 'ClientMessagesPrivate.dart';
 class Clients extends ChangeNotifier{
 
 List<String> _clients=[];
@@ -26,9 +28,8 @@ _clients.join(", ");
 notifyListeners();
 }
 
-
 List<ClientMessages> clientMessages=[];
-
+List<ClientMessagesPrivate> privatemessages=[];
 void setmessage(message,name,isself,isimage){
   ClientMessages client=new ClientMessages();
   client.isImage=isimage;
@@ -41,5 +42,17 @@ notifyListeners();
 getmessage(){
  return clientMessages;
 }
+void setprivatemessages(bool isSelf, String message,String name){
+  ClientMessagesPrivate clientMessagesPrivate=new ClientMessagesPrivate();
+  clientMessagesPrivate.isSelf=isSelf;
+  clientMessagesPrivate.message=message;
+  clientMessagesPrivate.name=name;
+  privatemessages.add(clientMessagesPrivate);
+  notifyListeners();
 
+
+}
+getprivatemessages(){
+  return privatemessages;
+}
 }

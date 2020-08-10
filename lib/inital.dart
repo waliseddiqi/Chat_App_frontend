@@ -1,5 +1,4 @@
 
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:adhara_socket_io/adhara_socket_io.dart';
@@ -12,7 +11,7 @@ import 'env.dart';
 import 'package:provider/provider.dart';
 import 'Clients.dart';
 import 'PrivateChat.dart';
-
+import 'ClientMessagesPrivate.dart';
 class MyApp extends StatelessWidget {
   @override
 @override
@@ -36,32 +35,7 @@ class _MyAppState extends State<MyAppWidget> {
 
  File _image;
   final picker = ImagePicker();
- 
-  Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-  
-    /*setState(() {
-        isself.add(true);
-       
-        name.add("you");
-        isImage.add(true);
-
-*/
-     _image = File(pickedFile.path);
-     String dedata;
-     var clientMessages=Provider.of<Clients>(context,listen: false);
-     clientMessages.setmessage(_image, "You", true, true);
-    //messages.add(_image);
-_image.readAsBytes().then((value) => {
-  dedata=base64Encode(value),
-   
-  sendimage(dedata)
-});
-  
-  }
-
-
-  SocketIOManager manager;
+    SocketIOManager manager;
    SocketOptions socketOptions;
   SocketIO socket;
 TextEditingController textEditingController=new TextEditingController();
@@ -69,18 +43,36 @@ String text;
 String _name="";
  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 String notificationTask="no simple anymore";
-  @override
+
+   @override
   void initState() {
     super.initState();
-
-
-      //https://chatapp45.herokuapp.com/
      socketOptions=new SocketOptions(Env.productionUrl,enableLogging: true,transports: [Transports.WEB_SOCKET,Transports.POLLING]);
     socketConfig();
+    
   }
-
-
-
+  Future<void> socketConfig() async {
+    loadname();
+    manager = SocketIOManager();
+ socket = await manager.createInstance(socketOptions);    
+		socket.connect();
+   
+	onrecieve();
+  newusercreatea();
+	}
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+     _image = File(pickedFile.path);
+     String dedata;
+     var clientMessages=Provider.of<Clients>(context,listen: false);
+     clientMessages.setmessage(_image, "You", true, true);
+_image.readAsBytes().then((value) => {
+  dedata=base64Encode(value),
+   
+  sendimage(dedata)
+});
+  
+  }
 Future<void>loadname() async{
 SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
 _name=sharedPreferences.getString("Name");
@@ -100,14 +92,6 @@ void onrecieve(){
 
   var clientMessages=Provider.of<Clients>(context,listen: false);
   clientMessages.setmessage(data[1], data[0], false, false);
-     // print(data);
-   /*  setState(() {
-       messages.add(data[1]);
-       name.add(data[0]);
-     isself.add(false);
-     isImage.add(false);
-     });*/
-     
 		});
     socket.on("user-connected",(data){
  
@@ -124,15 +108,6 @@ void onrecieve(){
 
     socket.on("get-Image", (data) { 
       try {
-       
-     //var dataimage= base64.decode(data[1]);
-     // print(dataimage);
-     /*setState(() {
-       messages.add(data[1]);
-      name.add(data[0]);
-      isImage.add(true);
-      isself.add(false);
-     });*/
      var clientMessages=Provider.of<Clients>(context,listen: false);
      clientMessages.setmessage(data[1],data[0], false, true);
       
@@ -153,21 +128,11 @@ void logout() async{
   socket.emit("disconnected", [{"name":name}]);
   SharedPreferences sharedPreferences=await SharedPreferences.getInstance();
   sharedPreferences.clear().then((value) => {
-  
-    
     Navigator.push(context, MaterialPageRoute(builder: (context)=>Initial()))
   });
 
 }
-Future<void> socketConfig() async {
-    loadname();
-    manager = SocketIOManager();
- socket = await manager.createInstance(socketOptions);    
-		socket.connect();
-   
-	onrecieve();
-  newusercreatea();
-	}
+
   @override
   Widget build(BuildContext context) {
     var size=MediaQuery.of(context).size;
@@ -243,7 +208,7 @@ Future<void> socketConfig() async {
                               child: Column(
            mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Messages(),
+                    Messages(isprivatemessages: false,),
                     
                    
                                          Container(
@@ -293,20 +258,13 @@ Future<void> socketConfig() async {
                                       child: Icon(Icons.send,color: Colors.orangeAccent,size: size.height/35,),
                                       onTap: 
                                     (){
-                                      /*setState(() {
-                                         isImage.add(false);
-                                        sendmessage(textEditingController.text.toString());
-                                        messages.add(textEditingController.text.toString());
-                                        name.add("You");
-                                        isself.add(true);
-                                       
-                                     
-                                      });*/
+                                
                                       sendmessage(textEditingController.text.toString());
                                         var clientMessages=Provider.of<Clients>(context,listen: false);
                                        
                                         clientMessages.setmessage(textEditingController.text.toString(), "You", true, false);
                                          textEditingController.clear();
+                                         
                                     }),
                                   ),
                                      Container(
@@ -337,7 +295,8 @@ Future<void> socketConfig() async {
               )
             ),
          ),
-        
+    
+    
    );
 
     
